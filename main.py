@@ -83,7 +83,6 @@ return (
     f"📈 1h Volume: {vol}\n"
     f"💧 Liquidity: {liq}\n"
 )
-"
             f"🕒Age: {age}m • 🛒{b}/🛍️{s} • FDV: {fmt_usd(fdv)} • ⚙️Score: *{sc:.2f}*
 "
             f"[DexScreener]({url})")
