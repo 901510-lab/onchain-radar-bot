@@ -77,7 +77,12 @@ def short_pair_row(p):
     liq=fmt_usd((p.get("liquidity") or {}).get("usd",0))
     b,s=buys_sells(p); age=int(age_minutes(p.get("pairCreatedAt",0)))
     fdv=p.get("fdv"); url=p.get("url"); sc=p.get("score",0)
-    return (f"*{sym}* • 💵Price: `{price}` • 📈Vol1h: {vol} • 💧Liq: {liq}
+return (
+    f"*{sym}*\n"
+    f"💵 Price: `{price}`\n"
+    f"📈 1h Volume: {vol}\n"
+    f"💧 Liquidity: {liq}\n"
+)
 "
             f"🕒Age: {age}m • 🛒{b}/🛍️{s} • FDV: {fmt_usd(fdv)} • ⚙️Score: *{sc:.2f}*
 "
