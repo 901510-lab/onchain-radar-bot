@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: onchain-radar-bot
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python main.py"
+    autoDeploy: true
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_CHAT_ID
+        sync: false
+      - key: BOT_USERNAME
+        sync: false
+      - key: CHAINS
+        sync: false
+      - key: POLL_INTERVAL_SEC
+        sync: false
+      - key: WATCH_INTERVAL_SEC
+        sync: false
+      - key: TOP_K
+        sync: false
+      - key: MIN_LIQ_USD
+        sync: false
+      - key: MIN_VOL_H1_USD
+        sync: false
+      - key: SCORE_THRESHOLD
+        sync: false
+      - key: STATE_FILE
+        sync: false
+      - key: LOG_SIGNALS
+        sync: false
+      - key: BIRDEYE_API_KEY
+        sync: false
