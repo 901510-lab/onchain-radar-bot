@@ -71,21 +71,24 @@ def rough_score(p):
     boosts=(p.get("boosts") or {}).get("active",0) or 0
     return round((vol/50000)*0.35 + (liq/25000)*0.25 + (1/age)*0.25 + max(0,imb)*0.10 + (boosts>0)*0.05,4)
 def short_pair_row(p):
-    sym=p.get("baseToken",{}).get("symbol") or "?"
-    price=p.get("priceUsd") or p.get("priceNative") or "?"
-    vol=fmt_usd((p.get("volume") or {}).get("h1",0))
-    liq=fmt_usd((p.get("liquidity") or {}).get("usd",0))
-    b,s=buys_sells(p); age=int(age_minutes(p.get("pairCreatedAt",0)))
-    fdv=p.get("fdv"); url=p.get("url"); sc=p.get("score",0)
-return (
-    f"*{sym}*\n"
-    f"💵 Price: `{price}`\n"
-    f"📈 1h Volume: {vol}\n"
-    f"💧 Liquidity: {liq}\n"
-)
-            f"🕒Age: {age}m • 🛒{b}/🛍️{s} • FDV: {fmt_usd(fdv)} • ⚙️Score: *{sc:.2f}*
-"
-            f"[DexScreener]({url})")
+    sym = p.get("baseToken", {}).get("symbol") or "?"
+    price = p.get("priceUsd") or p.get("priceNative") or "?"
+    vol = fmt_usd((p.get("volume") or {}).get("h1", 0))
+    liq = fmt_usd((p.get("liquidity") or {}).get("usd", 0))
+    b, s = buys_sells(p)
+    age = int(age_minutes(p.get("pairCreatedAt", 0)))
+    fdv = p.get("fdv")
+    url = p.get("url")
+    sc = p.get("score", 0)
+
+    return (
+        f"*{sym}*\n"
+        f"💵 Price: `{price}`\n"
+        f"📈 1h Volume: {vol}\n"
+        f"💧 Liquidity: {liq}\n"
+        f"🕒 Age: {age}m • 🛒 {b}/🛍️ {s} • FDV: {fmt_usd(fdv)} • ⚙️ Score: *{sc:.2f}*\n"
+        f"[DexScreener]({url})"
+    )
 
 async def fetch_json(client, url):
     r=await client.get(url); r.raise_for_status(); return r.json()
@@ -137,34 +140,47 @@ async def cmd_status(u:Update,c:ContextTypes.DEFAULT_TYPE):
 async def cmd_top(u:Update,c:ContextTypes.DEFAULT_TYPE):
     ranked=await scan_once()
     if not ranked: return await u.message.reply_text("Пока пусто по текущим фильтрам.")
-    await u.message.reply_text("
+    await u.message.reply_text(
+    "\n\n".join(short_pair_row(p) for p in ranked),
+    parse_mode=ParseMode.MARKDOWN,
+    disable_web_page_preview=False
+)
 
-".join(short_pair_row(p) for p in ranked), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=False)
 async def cmd_watch(u:Update,c:ContextTypes.DEFAULT_TYPE):
     if not c.args: return await u.message.reply_text("Использование: /watch <адрес_токена>")
     add_to_watchlist(c.args[0].strip()); await u.message.reply_text(f"✅ Добавлено: `{c.args[0]}`", parse_mode=ParseMode.MARKDOWN)
 
-async def background_scanner(app:Application):
+async def background_scanner(app: Application):
     while True:
         try:
-            ranked=await scan_once()
-            alerts=[]
+            ranked = await scan_once()
+            alerts = []
             for p in ranked:
-                addr=p.get("pairAddress"); sc=p.get("score",0.0)
-                last=STATE.sent.get(addr,0.0)
-                if sc>=SCORE_THRESHOLD and (time.time()-last)>3600:
-                    alerts.append(p); STATE.sent[addr]=time.time()
+                addr = p.get("pairAddress")
+                sc = p.get("score", 0.0)
+                last = STATE.sent.get(addr, 0.0)
+                if sc >= SCORE_THRESHOLD and (time.time() - last) > 3600:
+                    alerts.append(p)
+                    STATE.sent[addr] = time.time()
                     if LOG_SIGNALS:
-                        try: log_pair(p)
-                        except Exception: pass
+                        try:
+                            log_pair(p)
+                        except Exception:
+                            pass
             if alerts and ADMIN_CHAT_ID:
-                msg="🚨 *Новые кандидаты (Solana/BSC)*
-
-"+ "
-
-".join(short_pair_row(p) for p in alerts)
-                try: await app.bot.send_message(chat_id=ADMIN_CHAT_ID, text=msg, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=False)
-                except Exception as e: logging.warning("send err: %s", e)
+                msg = (
+                    "🚨 *Новые кандидаты (Solana/BSC)*\n\n"
+                    + "\n\n".join(short_pair_row(p) for p in alerts)
+                )
+                try:
+                    await app.bot.send_message(
+                        chat_id=ADMIN_CHAT_ID,
+                        text=msg,
+                        parse_mode=ParseMode.MARKDOWN,
+                        disable_web_page_preview=False,
+                    )
+                except Exception as e:
+                    logging.warning("send err: %s", e)
             STATE.save()
         except Exception as e:
             logging.error("worker err: %s", e)
@@ -185,9 +201,7 @@ async def watch_worker(app:Application):
                                     if not safe.get("ok"): continue
                                     p["score"]=rough_score(p)
                                     if p["score"]>=SCORE_THRESHOLD:
-                                        msg="👁️ *Watch alert*
-
-"+short_pair_row(p)
+                                        msg = "👁️ *Watch alert*\n\n" + short_pair_row(p)
                                         await app.bot.send_message(chat_id=ADMIN_CHAT_ID, text=msg, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=False)
                                         if LOG_SIGNALS:
                                             try: log_pair(p)
