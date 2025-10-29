@@ -2,22 +2,30 @@ services:
   - type: worker
     name: onchain-radar-bot
     env: python
-    plan: free  # можно заменить на starter/standard при необходимости
-    region: frankfurt  # выбери ближайший регион: frankfurt, oregon, singapore и т.д.
-    buildCommand: ""
+    plan: free
+    region: frankfurt  # выбери ближайший регион (frankfurt, oregon, singapore)
+    autoDeploy: true   # автоматический деплой при пуше в main
+    buildCommand: ""   # не требуется сборка
     startCommand: "python main.py"
 
     envVars:
+      # 🔐 Ключевые переменные окружения (указываются вручную в Dashboard)
       - key: BOT_TOKEN
         sync: false
       - key: ADMIN_CHAT_ID
         sync: false
+
+      # ⚙️ Базовые настройки
       - key: CHAINS
         value: "solana,bsc"
       - key: POLL_INTERVAL_SEC
         value: "600"
       - key: WATCH_INTERVAL_SEC
         value: "1800"
+      - key: TOP_K
+        value: "10"
+
+      # 💰 Фильтры и логика скоринга
       - key: MIN_LIQ_USD
         value: "5000"
       - key: MIN_VOL_H1_USD
@@ -26,3 +34,14 @@ services:
         value: "0.7"
       - key: LOG_SIGNALS
         value: "1"
+
+    # 🧩 Описание для удобства в Dashboard
+    metadata:
+      description: >
+        OnchainRadarBot — Telegram-бот для 24/7 мониторинга ончейн-токенов
+        (Solana и BSC) по данным DexScreener, с honeypot-фильтрацией,
+        скорингом и автоматическими уведомлениями о новых токенах.
+      maintainer: "Алекс (alex7706)"
+      repository: "https://github.com/901510-lab/onchain-radar-bot"
+      language: "Python 3"
+      category: "Blockchain, Telegram Bots"
