@@ -1,35 +1,28 @@
 services:
-  - type: web
+  - type: worker
     name: onchain-radar-bot
     env: python
-    plan: free
-    buildCommand: "pip install -r requirements.txt"
+    plan: free  # можно заменить на starter/standard при необходимости
+    region: frankfurt  # выбери ближайший регион: frankfurt, oregon, singapore и т.д.
+    buildCommand: ""
     startCommand: "python main.py"
-    autoDeploy: true
+
     envVars:
       - key: BOT_TOKEN
         sync: false
       - key: ADMIN_CHAT_ID
         sync: false
-      - key: BOT_USERNAME
-        sync: false
       - key: CHAINS
-        sync: false
+        value: "solana,bsc"
       - key: POLL_INTERVAL_SEC
-        sync: false
+        value: "600"
       - key: WATCH_INTERVAL_SEC
-        sync: false
-      - key: TOP_K
-        sync: false
+        value: "1800"
       - key: MIN_LIQ_USD
-        sync: false
+        value: "5000"
       - key: MIN_VOL_H1_USD
-        sync: false
+        value: "20000"
       - key: SCORE_THRESHOLD
-        sync: false
-      - key: STATE_FILE
-        sync: false
+        value: "0.7"
       - key: LOG_SIGNALS
-        sync: false
-      - key: BIRDEYE_API_KEY
-        sync: false
+        value: "1"
