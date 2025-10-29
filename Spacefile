@@ -1,0 +1,20 @@
+# Spacefile — манифест для Deta Space
+name: onchain-radar-bot
+type: app
+description: Telegram-бот для мониторинга токенов (Solana/BSC)
+micropython: false
+
+env:
+  - BOT_TOKEN
+  - ADMIN_CHAT_ID
+  - CHAINS
+  - POLL_INTERVAL_SEC
+  - WATCH_INTERVAL_SEC
+  - TOP_K
+  - MIN_LIQ_USD
+  - MIN_VOL_H1_USD
+  - SCORE_THRESHOLD
+  - LOG_SIGNALS
+
+run:
+  command: python main.py
