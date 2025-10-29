@@ -3,10 +3,13 @@ services:
     name: onchain-radar-bot
     env: python
     plan: free
-    region: frankfurt  # выбери ближайший регион (frankfurt, oregon, singapore)
-    autoDeploy: true   # автоматический деплой при пуше в main
-    buildCommand: ""   # не требуется сборка
-    startCommand: "python main.py"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_CHAT_ID
+        sync: false
 
     envVars:
       # 🔐 Ключевые переменные окружения (указываются вручную в Dashboard)
