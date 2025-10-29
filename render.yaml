@@ -5,11 +5,6 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: python main.py
-    envVars:
-      - key: BOT_TOKEN
-        sync: false
-      - key: ADMIN_CHAT_ID
-        sync: false
 
     envVars:
       # 🔐 Ключевые переменные окружения (указываются вручную в Dashboard)
